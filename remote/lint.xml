@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lint>
+    <!-- Ignore the GradleDependency issue in the given file -->
+    <issue id="GradleDependency">
+        <ignore path="build.gradle"/>
+    </issue>
+</lint>
