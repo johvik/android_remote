@@ -3,6 +3,8 @@ jdk: oraclejdk7
 before_install:
 - sudo apt-get update -qq
 - if [ `uname -m` = x86_64 ]; then sudo apt-get install -qq --force-yes libgd2-xpm ia32-libs ia32-libs-multiarch; fi
+# for gradle output style
+- export TERM=dumb
 # install android SDK
 - wget http://dl.google.com/android/android-sdk_r22.6-linux.tgz
 - tar -xzf android-sdk_r22.6-linux.tgz
@@ -12,4 +14,5 @@ before_install:
 - echo "sdk.dir=$ANDROID_HOME" > local.properties
 # "echo yes |" part is to accept license from android sdk manager tool
 - echo yes | android update sdk -t tools,platform-tools,extra-android-support,extra-android-m2repository,android-16 --force --no-ui
+- find $ANDROID_HOME/build-tools
 install: ./gradlew assemble --stacktrace
