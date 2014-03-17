@@ -13,6 +13,6 @@ before_install:
 # manually set sdk.dir variable, according to local paths
 - echo "sdk.dir=$ANDROID_HOME" > local.properties
 # "echo yes |" part is to accept license from android sdk manager tool
-- echo yes | android update sdk -t tools,platform-tools,extra-android-support,extra-android-m2repository,android-16 --force --no-ui
+- echo yes | android update sdk -t tools,platform-tools,build-tools-19.0.1,extra-android-support,extra-android-m2repository,android-16 --force --no-ui
 - find $ANDROID_HOME/build-tools
 install: ./gradlew assemble --stacktrace
