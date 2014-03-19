@@ -1,4 +1,4 @@
-package android.remote.mousebutton;
+package android.remote.mouse;
 
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -17,26 +17,27 @@ import java.util.Observer;
  * A view to draw the state of a mouse model. It can show buttons and indicates when they are
  * clicked.
  */
-public class MouseButtonView extends View implements Observer {
+public class MouseView extends View implements Observer {
     private Paint mButtonPaint;
     private int mButtonColor = Color.RED;
     private int mButtonCornerSize;
-    private RectF mButtonRectF;
+    private RectF mLeftButtonRectF;
+    private RectF mRightButtonRectF;
     private boolean mCalculatedMeasurements = false;
 
-    private MouseButtonModel mMouseButtonModel = null;
+    private MouseModel mMouseModel = null;
 
-    public MouseButtonView(Context context) {
+    public MouseView(Context context) {
         super(context);
         init(null, 0);
     }
 
-    public MouseButtonView(Context context, AttributeSet attrs) {
+    public MouseView(Context context, AttributeSet attrs) {
         super(context, attrs);
         init(attrs, 0);
     }
 
-    public MouseButtonView(Context context, AttributeSet attrs, int defStyle) {
+    public MouseView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         init(attrs, defStyle);
     }
@@ -45,11 +46,11 @@ public class MouseButtonView extends View implements Observer {
         // Load attributes
         final Context context = getContext();
         if (context != null) {
-            final TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.MouseButtonView,
+            final TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.MouseView,
                     defStyle, 0);
 
             if (a != null) {
-                mButtonColor = a.getColor(R.styleable.MouseButtonView_buttonColor, mButtonColor);
+                mButtonColor = a.getColor(R.styleable.MouseView_buttonColor, mButtonColor);
                 a.recycle();
             }
             // Change the alpha of the color
@@ -74,16 +75,22 @@ public class MouseButtonView extends View implements Observer {
 
             int contentWidth = getWidth() - paddingLeft - paddingRight;
             int contentHeight = getHeight() - paddingTop - paddingBottom;
+            // 50% of width and 5% for the middle
+            int buttonWidth = (int) ((double) contentWidth * 0.5 * 0.95);
+            int middleSpace = contentWidth - buttonWidth * 2;
             // 120% of button width
-            int buttonHeight = (int) ((double) contentWidth * 1.2);
+            int buttonHeight = (int) ((double) buttonWidth * 1.2);
             // Make sure its not higher than the content
             buttonHeight = Math.min(contentHeight, buttonHeight);
 
             // 25% of button width
-            mButtonCornerSize = (int) ((double) contentWidth * 0.25);
+            mButtonCornerSize = (int) ((double) buttonWidth * 0.25);
 
-            mButtonRectF = new RectF(0, 0, contentWidth, buttonHeight);
-            mButtonRectF.offsetTo(paddingLeft, paddingTop);
+            mLeftButtonRectF = new RectF(0, 0, buttonWidth, buttonHeight);
+            mLeftButtonRectF.offsetTo(paddingLeft, paddingTop);
+
+            mRightButtonRectF = new RectF(0, 0, buttonWidth, buttonHeight);
+            mRightButtonRectF.offsetTo(mLeftButtonRectF.right + middleSpace, paddingTop);
         }
     }
 
@@ -93,18 +100,22 @@ public class MouseButtonView extends View implements Observer {
 
         updateMeasurements();
 
-        if (mMouseButtonModel != null) {
-            if (mMouseButtonModel.isButtonDown()) {
-                canvas.drawRoundRect(mButtonRectF, mButtonCornerSize, mButtonCornerSize,
+        if (mMouseModel != null) {
+            if (mMouseModel.isLeftButtonDown()) {
+                canvas.drawRoundRect(mLeftButtonRectF, mButtonCornerSize, mButtonCornerSize,
+                        mButtonPaint);
+            }
+            if (mMouseModel.isRightButtonDown()) {
+                canvas.drawRoundRect(mRightButtonRectF, mButtonCornerSize, mButtonCornerSize,
                         mButtonPaint);
             }
         }
     }
 
-    public void setMouseButtonModel(MouseButtonModel mouseButtonModel) {
-        mMouseButtonModel = mouseButtonModel;
+    public void setMouseButtonModel(MouseModel mouseModel) {
+        mMouseModel = mouseModel;
         // Start observing
-        mMouseButtonModel.addObserver(this);
+        mMouseModel.addObserver(this);
     }
 
     @Override

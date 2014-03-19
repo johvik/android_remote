@@ -1,9 +1,9 @@
 package android.remote;
 
 import android.os.Bundle;
-import android.remote.mousebutton.MouseButtonController;
-import android.remote.mousebutton.MouseButtonModel;
-import android.remote.mousebutton.MouseButtonView;
+import android.remote.mouse.MouseController;
+import android.remote.mouse.MouseModel;
+import android.remote.mouse.MouseView;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -16,28 +16,12 @@ public class MainActivity extends ActionBarActivity {
         setContentView(R.layout.activity_main);
 
         // Set up MVC
-        {
-            // Left
-            MouseButtonModel mouseButtonModel = new MouseButtonModel();
-            MouseButtonView mouseButtonView = (MouseButtonView) findViewById(R.id
-                    .leftMouseButtonView);
-            MouseButtonController mouseButtonController = new MouseButtonController
-                    (mouseButtonModel);
-            mouseButtonView.setMouseButtonModel(mouseButtonModel);
-            mouseButtonView.setOnClickListener(mouseButtonController);
-            mouseButtonView.setOnLongClickListener(mouseButtonController);
-        }
-        {
-            // Right
-            MouseButtonModel mouseButtonModel = new MouseButtonModel();
-            MouseButtonView mouseButtonView = (MouseButtonView) findViewById(R.id
-                    .rightMouseButtonView);
-            MouseButtonController mouseButtonController = new MouseButtonController
-                    (mouseButtonModel);
-            mouseButtonView.setMouseButtonModel(mouseButtonModel);
-            mouseButtonView.setOnClickListener(mouseButtonController);
-            mouseButtonView.setOnLongClickListener(mouseButtonController);
-        }
+        MouseModel mouseModel = new MouseModel();
+        MouseView mouseView = (MouseView) findViewById(R.id.mouseView);
+        MouseController mouseController = new MouseController(mouseModel);
+        mouseView.setMouseButtonModel(mouseModel);
+        mouseView.setOnClickListener(mouseController);
+        mouseView.setOnLongClickListener(mouseController);
     }
 
     @Override

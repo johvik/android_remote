@@ -1,5 +1,5 @@
 <resources>
-    <declare-styleable name="MouseButtonView">
+    <declare-styleable name="MouseView">
         <attr name="buttonColor" format="color"/>
     </declare-styleable>
 </resources>
