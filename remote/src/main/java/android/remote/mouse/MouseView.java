@@ -23,6 +23,7 @@ public class MouseView extends View implements Observer {
     private int mButtonCornerSize;
     private RectF mLeftButtonRectF;
     private RectF mRightButtonRectF;
+    private float mMiddle;
     private boolean mCalculatedMeasurements = false;
 
     private MouseModel mMouseModel = null;
@@ -75,6 +76,9 @@ public class MouseView extends View implements Observer {
 
             int contentWidth = getWidth() - paddingLeft - paddingRight;
             int contentHeight = getHeight() - paddingTop - paddingBottom;
+            // Middle point of the view
+            mMiddle = (float) paddingLeft + (float) contentWidth / 2.0f;
+
             // 50% of width and 5% for the middle
             int buttonWidth = (int) ((double) contentWidth * 0.5 * 0.95);
             int middleSpace = contentWidth - buttonWidth * 2;
@@ -112,10 +116,14 @@ public class MouseView extends View implements Observer {
         }
     }
 
-    public void setMouseButtonModel(MouseModel mouseModel) {
+    public void setMouseModel(MouseModel mouseModel) {
         mMouseModel = mouseModel;
         // Start observing
         mMouseModel.addObserver(this);
+    }
+
+    public boolean isLeftSide(float x) {
+        return x < mMiddle;
     }
 
     @Override

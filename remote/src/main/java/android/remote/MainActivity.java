@@ -5,10 +5,13 @@ import android.remote.mouse.MouseController;
 import android.remote.mouse.MouseModel;
 import android.remote.mouse.MouseView;
 import android.support.v7.app.ActionBarActivity;
+import android.view.GestureDetector;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 
 public class MainActivity extends ActionBarActivity {
+    private GestureDetector gestureDetector;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -18,10 +21,15 @@ public class MainActivity extends ActionBarActivity {
         // Set up MVC
         MouseModel mouseModel = new MouseModel();
         MouseView mouseView = (MouseView) findViewById(R.id.mouseView);
-        MouseController mouseController = new MouseController(mouseModel);
-        mouseView.setMouseButtonModel(mouseModel);
-        mouseView.setOnClickListener(mouseController);
-        mouseView.setOnLongClickListener(mouseController);
+        MouseController mouseController = new MouseController(mouseModel, mouseView);
+        mouseView.setMouseModel(mouseModel);
+
+        gestureDetector = new GestureDetector(getApplicationContext(), mouseController);
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        return gestureDetector.onTouchEvent(event);
     }
 
     @Override
