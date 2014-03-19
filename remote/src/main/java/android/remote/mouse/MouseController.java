@@ -1,54 +1,99 @@
 package android.remote.mouse;
 
-import android.util.Log;
+import android.remote.ConnectionThread;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 
+import remote.api.commands.MouseMove;
+import remote.api.commands.MousePress;
+import remote.api.commands.MouseRelease;
+
 public class MouseController implements GestureDetector.OnGestureListener {
+    private static final int LEFT_BUTTON_MASK = 1024; // BUTTON1_DOWN_MASK
+    private static final int RIGHT_BUTTON_MASK = 2048; // BUTTON2_DOWN_MASK
+
     private MouseModel mMouseModel;
     private MouseView mMouseView;
     private boolean mLeftButtonLock = false;
     private boolean mRightButtonLock = false;
+    private ConnectionThread mConnectionThread = null;
 
     public MouseController(MouseModel mouseModel, MouseView mouseView) {
         mMouseModel = mouseModel;
         mMouseView = mouseView;
     }
 
+    private void leftButtonUp() {
+        mMouseModel.setLeftButtonDown(false);
+        if (mConnectionThread != null) {
+            mConnectionThread.commandRequest(new MouseRelease(LEFT_BUTTON_MASK));
+        }
+    }
+
+    private void leftButtonDown() {
+        mMouseModel.setLeftButtonDown(true);
+        if (mConnectionThread != null) {
+            mConnectionThread.commandRequest(new MousePress(LEFT_BUTTON_MASK));
+        }
+    }
+
+    private void rightButtonUp() {
+        mMouseModel.setRightButtonDown(false);
+        if (mConnectionThread != null) {
+            mConnectionThread.commandRequest(new MouseRelease(RIGHT_BUTTON_MASK));
+        }
+    }
+
+    private void rightButtonDown() {
+        mMouseModel.setRightButtonDown(true);
+        if (mConnectionThread != null) {
+            mConnectionThread.commandRequest(new MousePress(RIGHT_BUTTON_MASK));
+        }
+    }
+
     private void toggleButtonLock(MotionEvent e) {
         if (mMouseView.isLeftSide(e.getX())) {
             if (mLeftButtonLock) {
-                mMouseModel.setLeftButtonDown(false);
+                leftButtonUp();
             } else {
-                mMouseModel.setLeftButtonDown(true);
+                leftButtonDown();
             }
             mLeftButtonLock = !mLeftButtonLock; // Toggle
-            Log.d("MouseController", "toggleLeftButtonLock " + mMouseModel.isLeftButtonDown());
         } else {
+            // Right side
             if (mRightButtonLock) {
-                mMouseModel.setRightButtonDown(false);
+                rightButtonUp();
             } else {
-                mMouseModel.setRightButtonDown(true);
+                rightButtonDown();
             }
             mRightButtonLock = !mRightButtonLock; // Toggle
-            Log.d("MouseController", "toggleRightButtonLock " + mMouseModel.isRightButtonDown());
         }
     }
 
     private void buttonClick(MotionEvent e) {
         if (mMouseView.isLeftSide(e.getX())) {
             if (!mLeftButtonLock) {
-                mMouseModel.setLeftButtonDown(true);
-                mMouseModel.setLeftButtonDown(false);
-                Log.d("MouseController", "leftClick");
+                leftButtonDown();
+                leftButtonUp();
             }
         } else {
+            // Right side
             if (!mRightButtonLock) {
-                mMouseModel.setRightButtonDown(true);
-                mMouseModel.setRightButtonDown(false);
-                Log.d("MouseController", "rightClick");
+                rightButtonDown();
+                rightButtonUp();
             }
         }
+    }
+
+    private void mouseMove(float distanceX, float distanceY) {
+        if (mConnectionThread != null) {
+            // Coordinate system is reversed...
+            mConnectionThread.commandRequest(new MouseMove((short) -distanceX, (short) -distanceY));
+        }
+    }
+
+    public void setConnectionThread(ConnectionThread connectionThread) {
+        mConnectionThread = connectionThread;
     }
 
     /**
@@ -106,8 +151,7 @@ public class MouseController implements GestureDetector.OnGestureListener {
      */
     @Override
     public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-        Log.d("MouseController", "onScroll " + distanceX + " " + distanceY);
-        // TODO
+        mouseMove(distanceX, distanceY);
         return true;
     }
 
