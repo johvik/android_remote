@@ -22,6 +22,7 @@ import remote.api.Packet;
 public class MainActivity extends ActionBarActivity implements ConnectionThread.ConnectionCallback {
     private static final PublicKey PUBLIC_KEY;
     private static ConnectionThread mConnectionThread = null;
+    private static MouseModel mMouseModel = null;
 
     static {
         try {
@@ -36,13 +37,13 @@ public class MainActivity extends ActionBarActivity implements ConnectionThread.
 
     private GestureDetector mGestureDetector;
 
-    private MouseModel mMouseModel;
     private MouseView mMouseView;
     private MouseController mMouseController;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState); setContentView(R.layout.activity_main);
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
 
         // Set up MVC
         mMouseView = (MouseView) findViewById(R.id.mouseView); // View will stay the same
@@ -54,15 +55,19 @@ public class MainActivity extends ActionBarActivity implements ConnectionThread.
 
     @Override
     protected void onResume() {
-        super.onResume(); boolean connected = false; if (mConnectionThread != null) {
+        super.onResume();
+        boolean connected = false;
+        if (mConnectionThread != null) {
             mConnectionThread.setConnectionCallback(this);
             connected = mConnectionThread.isConnected();
-        } Log.d("MainActivity", "connected: " + connected);
+        }
+        Log.d("MainActivity", "connected: " + connected);
     }
 
     @Override
     protected void onPause() {
-        super.onPause(); if (mConnectionThread != null) {
+        super.onPause();
+        if (mConnectionThread != null) {
             mConnectionThread.setConnectionCallback(null);
         }
     }
@@ -75,7 +80,8 @@ public class MainActivity extends ActionBarActivity implements ConnectionThread.
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu); return true;
+        getMenuInflater().inflate(R.menu.main, menu);
+        return true;
     }
 
     @Override
@@ -83,13 +89,18 @@ public class MainActivity extends ActionBarActivity implements ConnectionThread.
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId(); if (id == R.id.action_settings) {
-            return true;
-        } return super.onOptionsItemSelected(item);
+        switch (item.getItemId()) {
+            case R.id.action_settings:
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     private void updateMVC() {
-        mMouseModel = new MouseModel();
+        if (mMouseModel == null) {
+            mMouseModel = new MouseModel();
+        }
         mMouseController = new MouseController(mMouseModel, mMouseView);
         mMouseView.setMouseModel(mMouseModel);
 
@@ -100,10 +111,10 @@ public class MainActivity extends ActionBarActivity implements ConnectionThread.
         if (mConnectionThread == null) {
             mConnectionThread = new ConnectionThread(PUBLIC_KEY, "192.168.1.106", 9456, "test",
                     "test", this);
-            mMouseController.setConnectionThread(mConnectionThread);
         } else {
             mConnectionThread.setConnectionCallback(this);
         }
+        mMouseController.setConnectionThread(mConnectionThread);
     }
 
     @Override
