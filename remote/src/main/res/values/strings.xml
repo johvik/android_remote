@@ -3,5 +3,6 @@
 
     <string name="app_name">Android Remote</string>
     <string name="action_settings">Settings</string>
+    <string name="not_connected">Not connected</string>
 
 </resources>

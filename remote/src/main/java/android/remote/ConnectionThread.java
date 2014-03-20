@@ -1,5 +1,7 @@
 package android.remote;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -38,8 +40,8 @@ public class ConnectionThread extends Thread {
                 try {
                     mSocket = new Socket();
                     mSocket.connect(new InetSocketAddress(dstName, dstPort), 10000); // 10 s
-                    mInput = mSocket.getInputStream();
-                    mOutput = mSocket.getOutputStream();
+                    mInput = new BufferedInputStream(mSocket.getInputStream());
+                    mOutput = new BufferedOutputStream(mSocket.getOutputStream());
                     mClientProtocol = new ClientProtocol(publicKey, mInput, mOutput);
                     mClientProtocol.authenticate(user, password);
                     // Receive authentication response packet

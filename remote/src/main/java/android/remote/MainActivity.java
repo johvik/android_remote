@@ -10,6 +10,8 @@ import android.view.GestureDetector;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
+import android.view.View;
+import android.widget.TextView;
 
 import java.math.BigInteger;
 import java.security.GeneralSecurityException;
@@ -36,6 +38,7 @@ public class MainActivity extends ActionBarActivity implements ConnectionThread.
     }
 
     private GestureDetector mGestureDetector;
+    private TextView mTextView;
 
     private MouseView mMouseView;
     private MouseController mMouseController;
@@ -45,6 +48,7 @@ public class MainActivity extends ActionBarActivity implements ConnectionThread.
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        mTextView = (TextView) findViewById(R.id.textView);
         // Set up MVC
         mMouseView = (MouseView) findViewById(R.id.mouseView); // View will stay the same
         updateMVC();
@@ -61,6 +65,7 @@ public class MainActivity extends ActionBarActivity implements ConnectionThread.
             mConnectionThread.setConnectionCallback(this);
             connected = mConnectionThread.isConnected();
         }
+        updateVisibility(connected);
         Log.d("MainActivity", "connected: " + connected);
     }
 
@@ -97,6 +102,16 @@ public class MainActivity extends ActionBarActivity implements ConnectionThread.
         }
     }
 
+    private void updateVisibility(boolean connected) {
+        if (connected) {
+            mTextView.setVisibility(View.GONE);
+            mMouseView.setVisibility(View.VISIBLE);
+        } else {
+            mTextView.setVisibility(View.VISIBLE);
+            mMouseView.setVisibility(View.GONE);
+        }
+    }
+
     private void updateMVC() {
         if (mMouseModel == null) {
             mMouseModel = new MouseModel();
@@ -119,11 +134,21 @@ public class MainActivity extends ActionBarActivity implements ConnectionThread.
 
     @Override
     public void onConnect() {
-        Log.d("MainActivity", "onConnect");
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                updateVisibility(true);
+            }
+        });
     }
 
     @Override
     public void onDisconnect(Exception e) {
-        Log.d("MainActivity", "onDisconnect", e);
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                updateVisibility(false);
+            }
+        });
     }
 }
