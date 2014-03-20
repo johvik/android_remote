@@ -10,7 +10,7 @@ import remote.api.commands.MouseRelease;
 
 public class MouseController implements GestureDetector.OnGestureListener {
     private static final int LEFT_BUTTON_MASK = 1024; // BUTTON1_DOWN_MASK
-    private static final int RIGHT_BUTTON_MASK = 2048; // BUTTON2_DOWN_MASK
+    private static final int RIGHT_BUTTON_MASK = 4096; // BUTTON3_DOWN_MASK
 
     private MouseModel mMouseModel;
     private MouseView mMouseView;
