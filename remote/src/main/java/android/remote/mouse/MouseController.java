@@ -88,7 +88,11 @@ public class MouseController implements GestureDetector.OnGestureListener {
     private void mouseMove(float distanceX, float distanceY) {
         if (mConnectionThread != null) {
             // Coordinate system is reversed...
-            mConnectionThread.commandRequest(new MouseMove((short) -distanceX, (short) -distanceY));
+            short x = (short) -distanceX;
+            short y = (short) -distanceY;
+            if (x != 0 || y != 0) { // No point in sending just zeros
+                mConnectionThread.commandRequest(new MouseMove(x, y));
+            }
         }
     }
 
