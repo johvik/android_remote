@@ -5,18 +5,43 @@ import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
+import android.remote.connection.ConnectionConfig;
 
+import java.security.GeneralSecurityException;
 import java.util.Arrays;
 
 public class SettingsFragment extends PreferenceFragment implements SharedPreferences
         .OnSharedPreferenceChangeListener {
-    public static final String KEY_PREF_SERVER_ADDRESS = "pref_server_address";
-    public static final String KEY_PREF_SERVER_PORT = "pref_server_port";
-    public static final String KEY_PREF_LOGIN_USER = "pref_login_user";
-    public static final String KEY_PREF_LOGIN_PASSWORD = "pref_login_password";
-    public static final String KEY_PREF_RSA_MODULUS = "pref_rsa_modulus";
-    public static final String KEY_PREF_RSA_EXPONENT = "pref_rsa_exponent";
+    private static final String KEY_PREF_SERVER_ADDRESS = "pref_server_address";
+    private static final String KEY_PREF_SERVER_PORT = "pref_server_port";
+    private static final String KEY_PREF_LOGIN_USER = "pref_login_user";
+    private static final String KEY_PREF_LOGIN_PASSWORD = "pref_login_password";
+    private static final String KEY_PREF_RSA_MODULUS = "pref_rsa_modulus";
+    private static final String KEY_PREF_RSA_EXPONENT = "pref_rsa_exponent";
     private SharedPreferences mSharedPreferences;
+
+    public SettingsFragment() {
+    }
+
+    public static SettingsFragment newInstance() {
+        return new SettingsFragment();
+    }
+
+    public static ConnectionConfig getConnectionConfig(SharedPreferences sharedPreferences)
+            throws GeneralSecurityException, NumberFormatException {
+        String serverAddress = sharedPreferences.getString(SettingsFragment
+                .KEY_PREF_SERVER_ADDRESS, "");
+        String serverPort = sharedPreferences.getString(SettingsFragment.KEY_PREF_SERVER_PORT, "");
+        int port = Integer.parseInt(serverPort);
+        String userLogin = sharedPreferences.getString(SettingsFragment.KEY_PREF_LOGIN_USER, "");
+        String userPassword = sharedPreferences.getString(SettingsFragment
+                .KEY_PREF_LOGIN_PASSWORD, "");
+        String rsaModulus = sharedPreferences.getString(SettingsFragment.KEY_PREF_RSA_MODULUS, "");
+        String rsaExponent = sharedPreferences.getString(SettingsFragment.KEY_PREF_RSA_EXPONENT,
+                "");
+        return new ConnectionConfig(rsaModulus, rsaExponent, serverAddress, port, userLogin,
+                userPassword);
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {

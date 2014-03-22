@@ -69,8 +69,8 @@ public class ConnectionThread extends Thread {
         mConnectionCallback = connectionCallback;
     }
 
-    public synchronized boolean isConnected() {
-        return mConnectionState == ConnectionState.CONNECTED;
+    public synchronized ConnectionState getConnectionState() {
+        return mConnectionState;
     }
 
     @Override
@@ -99,7 +99,11 @@ public class ConnectionThread extends Thread {
         mThreadPool.shutdown();
     }
 
-    public synchronized void disconnect(Exception e) {
+    public void disconnect() {
+        disconnect(null);
+    }
+
+    private synchronized void disconnect(Exception e) {
         if (mConnectionState != ConnectionState.CLOSED) {
             mConnectionState = ConnectionState.CLOSED;
             mThreadPool.execute(new Runnable() {
@@ -185,7 +189,7 @@ public class ConnectionThread extends Thread {
         }
     }
 
-    private enum ConnectionState {
+    public enum ConnectionState {
         PENDING, CONNECTED, CLOSED
     }
 

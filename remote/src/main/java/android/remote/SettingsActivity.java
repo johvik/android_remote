@@ -10,7 +10,7 @@ public class SettingsActivity extends Activity {
         super.onCreate(savedInstanceState);
         if (savedInstanceState == null) {
             getFragmentManager().beginTransaction().replace(android.R.id.content,
-                    new SettingsFragment()).commit();
+                    SettingsFragment.newInstance()).commit();
         }
         ActionBar actionBar = getActionBar();
         if (actionBar != null) {

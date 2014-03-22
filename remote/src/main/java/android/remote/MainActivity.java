@@ -7,30 +7,22 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.remote.connection.ConnectionConfig;
 import android.remote.connection.ConnectionThread;
-import android.remote.mouse.MouseController;
 import android.remote.mouse.MouseModel;
-import android.remote.mouse.MouseView;
-import android.util.Log;
 import android.view.GestureDetector;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
-import android.view.View;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import java.security.GeneralSecurityException;
 
-public class MainActivity extends Activity implements ConnectionThread.ConnectionCallback {
-    private static final int SETTINGS_REQUEST = 1;
+public class MainActivity extends Activity implements ConnectionThread.ConnectionCallback,
+        ControllerFragment.ControllerFragmentListener {
+    private static final MouseModel mMouseModel = new MouseModel();
     private static ConnectionThread mConnectionThread = null;
-    private static MouseModel mMouseModel = null;
-
-    private GestureDetector mGestureDetector;
-    private TextView mTextView;
-
-    private MouseView mMouseView;
-    private MouseController mMouseController;
+    private GestureDetector mGestureDetector = null;
+    private ConnectionThread.ConnectionState mConnectionState = ConnectionThread.ConnectionState
+            .CLOSED;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,26 +30,20 @@ public class MainActivity extends Activity implements ConnectionThread.Connectio
         setContentView(R.layout.activity_main);
         // Set default preference values
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
-
-        mTextView = (TextView) findViewById(R.id.textView);
-        // Set up MVC
-        mMouseView = (MouseView) findViewById(R.id.mouseView); // View will stay the same
-        updateMVC();
-
-        // Connect to server
-        connect();
+        if (savedInstanceState == null) {
+            updateFragment();
+        }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        boolean connected = false;
+        ConnectionThread.ConnectionState connectionState = ConnectionThread.ConnectionState.CLOSED;
         if (mConnectionThread != null) {
             mConnectionThread.setConnectionCallback(this);
-            connected = mConnectionThread.isConnected();
+            connectionState = mConnectionThread.getConnectionState();
         }
-        updateVisibility(connected);
-        Log.d("MainActivity", "connected: " + connected);
+        connectedStateChange(connectionState);
     }
 
     @Override
@@ -69,14 +55,27 @@ public class MainActivity extends Activity implements ConnectionThread.Connectio
     }
 
     @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        return mGestureDetector.onTouchEvent(event);
-    }
-
-    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
+
+        // Set items visibility according to the state
+        MenuItem connectMenuItem = menu.findItem(R.id.action_connect);
+        MenuItem disconnectMenuItem = menu.findItem(R.id.action_disconnect);
+        if (connectMenuItem != null && disconnectMenuItem != null) {
+            switch (mConnectionState) {
+                case CONNECTED:
+                    connectMenuItem.setVisible(false);
+                    break;
+                case CLOSED:
+                    disconnectMenuItem.setVisible(false);
+                    break;
+                case PENDING:
+                    connectMenuItem.setVisible(false);
+                    disconnectMenuItem.setVisible(false);
+                    break;
+            }
+        }
         return true;
     }
 
@@ -86,56 +85,61 @@ public class MainActivity extends Activity implements ConnectionThread.Connectio
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         switch (item.getItemId()) {
+            case R.id.action_connect:
+                if (mConnectionState == ConnectionThread.ConnectionState.CLOSED) {
+                    connectedStateChange(ConnectionThread.ConnectionState.PENDING);
+                    connect();
+                }
+                return true;
+            case R.id.action_disconnect:
+                if (mConnectionState != ConnectionThread.ConnectionState.CLOSED) {
+                    connectedStateChange(ConnectionThread.ConnectionState.CLOSED);
+                    if (mConnectionThread != null) {
+                        mConnectionThread.disconnect();
+                        mConnectionThread = null;
+                    }
+                }
+                return true;
             case R.id.action_settings:
                 Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
-                startActivityForResult(intent, SETTINGS_REQUEST);
+                startActivity(intent);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
 
-    private void updateVisibility(boolean connected) {
-        if (connected) {
-            mTextView.setVisibility(View.GONE);
-            mMouseView.setVisibility(View.VISIBLE);
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        return mGestureDetector != null && mGestureDetector.onTouchEvent(event);
+    }
+
+    private void connectedStateChange(ConnectionThread.ConnectionState connectionState) {
+        if (mConnectionState != connectionState) {
+            mConnectionState = connectionState;
+            invalidateOptionsMenu();
+            updateFragment();
+        }
+    }
+
+    private void updateFragment() {
+        if (mConnectionState == ConnectionThread.ConnectionState.CONNECTED) {
+            getFragmentManager().beginTransaction().replace(R.id.container,
+                    ControllerFragment.newInstance()).commit();
         } else {
-            mTextView.setVisibility(View.VISIBLE);
-            mMouseView.setVisibility(View.GONE);
+            getFragmentManager().beginTransaction().replace(R.id.container,
+                    NotConnectedFragment.newInstance()).commit();
         }
-    }
-
-    private void updateMVC() {
-        if (mMouseModel == null) {
-            mMouseModel = new MouseModel();
-        }
-        mMouseController = new MouseController(mMouseModel, mMouseView);
-        mMouseView.setMouseModel(mMouseModel);
-
-        mGestureDetector = new GestureDetector(getApplicationContext(), mMouseController);
-    }
-
-    private ConnectionConfig getConnectionConfig() throws GeneralSecurityException,
-            NumberFormatException {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        String serverAddress = sharedPreferences.getString(SettingsFragment
-                .KEY_PREF_SERVER_ADDRESS, "");
-        String serverPort = sharedPreferences.getString(SettingsFragment.KEY_PREF_SERVER_PORT, "");
-        int port = Integer.parseInt(serverPort);
-        String userLogin = sharedPreferences.getString(SettingsFragment.KEY_PREF_LOGIN_USER, "");
-        String userPassword = sharedPreferences.getString(SettingsFragment
-                .KEY_PREF_LOGIN_PASSWORD, "");
-        String rsaModulus = sharedPreferences.getString(SettingsFragment.KEY_PREF_RSA_MODULUS, "");
-        String rsaExponent = sharedPreferences.getString(SettingsFragment.KEY_PREF_RSA_EXPONENT,
-                "");
-        return new ConnectionConfig(rsaModulus, rsaExponent, serverAddress, port, userLogin,
-                userPassword);
     }
 
     private void connect() {
-        if (mConnectionThread == null) {
+        if (mConnectionState != ConnectionThread.ConnectionState.CONNECTED || mConnectionThread
+                == null) {
             try {
-                ConnectionConfig connectionConfig = getConnectionConfig();
+                SharedPreferences sharedPreferences = PreferenceManager
+                        .getDefaultSharedPreferences(this);
+                ConnectionConfig connectionConfig = SettingsFragment.getConnectionConfig
+                        (sharedPreferences);
                 mConnectionThread = new ConnectionThread(connectionConfig, this);
                 mMouseModel.reset(); // Reset the state
             } catch (GeneralSecurityException e) {
@@ -143,10 +147,7 @@ public class MainActivity extends Activity implements ConnectionThread.Connectio
             } catch (NumberFormatException e) {
                 Toast.makeText(this, R.string.connection_config_fail, Toast.LENGTH_LONG).show();
             }
-        } else {
-            mConnectionThread.setConnectionCallback(this);
         }
-        mMouseController.setConnectionThread(mConnectionThread);
     }
 
     @Override
@@ -154,7 +155,7 @@ public class MainActivity extends Activity implements ConnectionThread.Connectio
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                updateVisibility(true);
+                connectedStateChange(ConnectionThread.ConnectionState.CONNECTED);
             }
         });
     }
@@ -164,8 +165,28 @@ public class MainActivity extends Activity implements ConnectionThread.Connectio
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                updateVisibility(false);
+                connectedStateChange(ConnectionThread.ConnectionState.CLOSED);
             }
         });
+    }
+
+    /**
+     * Get the mouse model. This has to remain the same within the lifetime of the activity.
+     *
+     * @return The mouse model.
+     */
+    @Override
+    public MouseModel getMouseModel() {
+        return mMouseModel;
+    }
+
+    @Override
+    public ConnectionThread getConnectionThread() {
+        return mConnectionThread;
+    }
+
+    @Override
+    public void setGestureDetector(GestureDetector gestureDetector) {
+        mGestureDetector = gestureDetector;
     }
 }

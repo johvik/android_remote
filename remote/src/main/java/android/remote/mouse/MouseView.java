@@ -117,10 +117,12 @@ public class MouseView extends View implements Observer {
     }
 
     public void setMouseModel(MouseModel mouseModel) {
-        mMouseModel = mouseModel;
-        // Start observing
-        mMouseModel.addObserver(this);
-        invalidate();
+        if (mMouseModel != mouseModel) {
+            mMouseModel = mouseModel;
+            // Start observing
+            mMouseModel.addObserver(this);
+            invalidate();
+        }
     }
 
     public boolean isLeftSide(float x) {
