@@ -62,17 +62,20 @@ public class MainActivity extends Activity implements ConnectionThread.Connectio
         // Set items visibility according to the state
         MenuItem connectMenuItem = menu.findItem(R.id.action_connect);
         MenuItem disconnectMenuItem = menu.findItem(R.id.action_disconnect);
-        if (connectMenuItem != null && disconnectMenuItem != null) {
+        MenuItem terminateMenuItem = menu.findItem(R.id.action_terminate);
+        if (connectMenuItem != null && disconnectMenuItem != null && terminateMenuItem != null) {
             switch (mConnectionState) {
                 case CONNECTED:
                     connectMenuItem.setVisible(false);
                     break;
                 case CLOSED:
                     disconnectMenuItem.setVisible(false);
+                    terminateMenuItem.setVisible(false);
                     break;
                 case PENDING:
                     connectMenuItem.setVisible(false);
                     disconnectMenuItem.setVisible(false);
+                    terminateMenuItem.setVisible(false);
                     break;
             }
         }
@@ -98,6 +101,11 @@ public class MainActivity extends Activity implements ConnectionThread.Connectio
                         mConnectionThread.disconnect();
                         mConnectionThread = null;
                     }
+                }
+                return true;
+            case R.id.action_terminate:
+                if (mConnectionState == ConnectionThread.ConnectionState.CONNECTED) {
+                    mConnectionThread.terminateRequest(false);
                 }
                 return true;
             case R.id.action_settings:

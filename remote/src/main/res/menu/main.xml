@@ -15,8 +15,13 @@
         android:showAsAction="always"
         android:title="@string/action_disconnect"/>
     <item
-        android:id="@+id/action_settings"
+        android:id="@+id/action_terminate"
         android:orderInCategory="120"
+        android:showAsAction="never"
+        android:title="@string/action_terminate"/>
+    <item
+        android:id="@+id/action_settings"
+        android:orderInCategory="130"
         android:showAsAction="never"
         android:title="@string/action_settings"/>
 </menu>
