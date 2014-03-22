@@ -1,4 +1,4 @@
-package android.remote;
+package android.remote.connection;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -6,10 +6,8 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.security.GeneralSecurityException;
-import java.security.PublicKey;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -30,8 +28,7 @@ public class ConnectionThread extends Thread {
     private ConnectionState mConnectionState = ConnectionState.PENDING;
     private ConnectionCallback mConnectionCallback = null;
 
-    public ConnectionThread(final PublicKey publicKey, final String dstName, final int dstPort,
-                            final String user, final String password,
+    public ConnectionThread(final ConnectionConfig connectionConfig,
                             ConnectionCallback connectionCallback) {
         mConnectionCallback = connectionCallback;
         mThreadPool.execute(new Runnable() {
@@ -39,11 +36,12 @@ public class ConnectionThread extends Thread {
             public void run() {
                 try {
                     mSocket = new Socket();
-                    mSocket.connect(new InetSocketAddress(dstName, dstPort), 10000); // 10 s
+                    mSocket.connect(connectionConfig.inetSocketAddress, 10000); // 10 s
                     mInput = new BufferedInputStream(mSocket.getInputStream());
                     mOutput = new BufferedOutputStream(mSocket.getOutputStream());
-                    mClientProtocol = new ClientProtocol(publicKey, mInput, mOutput);
-                    mClientProtocol.authenticate(user, password);
+                    mClientProtocol = new ClientProtocol(connectionConfig.publicKey, mInput,
+                            mOutput);
+                    mClientProtocol.authenticate(connectionConfig.user, connectionConfig.password);
                     // Receive authentication response packet
                     Packet packet = mClientProtocol.nextPacket();
                     mClientProtocol.process(packet);

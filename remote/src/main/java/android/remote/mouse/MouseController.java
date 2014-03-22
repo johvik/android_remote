@@ -1,6 +1,6 @@
 package android.remote.mouse;
 
-import android.remote.ConnectionThread;
+import android.remote.connection.ConnectionThread;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 

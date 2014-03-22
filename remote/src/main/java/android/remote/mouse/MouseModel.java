@@ -29,4 +29,9 @@ public class MouseModel extends Observable {
             notifyObservers();
         }
     }
+
+    public void reset() {
+        setLeftButtonDown(false);
+        setRightButtonDown(false);
+    }
 }
