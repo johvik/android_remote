@@ -2,26 +2,35 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
     <PreferenceCategory android:title="@string/pref_server_title">
         <EditTextPreference
+            android:defaultValue=""
             android:key="pref_server_address"
             android:title="@string/pref_server_address_title"/>
         <EditTextPreference
+            android:defaultValue=""
+            android:inputType="number"
             android:key="pref_server_port"
             android:title="@string/pref_server_port_title"/>
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/pref_login_title">
         <EditTextPreference
+            android:defaultValue=""
             android:key="pref_login_user"
             android:title="@string/pref_login_user"/>
         <EditTextPreference
+            android:defaultValue=""
             android:inputType="textPassword"
             android:key="pref_login_password"
             android:title="@string/pref_login_password"/>
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/pref_rsa_tile">
         <EditTextPreference
+            android:defaultValue=""
+            android:inputType="number"
             android:key="pref_rsa_modulus"
             android:title="@string/pref_rsa_modulus"/>
         <EditTextPreference
+            android:defaultValue=""
+            android:inputType="number"
             android:key="pref_rsa_exponent"
             android:title="@string/pref_rsa_exponent"/>
     </PreferenceCategory>

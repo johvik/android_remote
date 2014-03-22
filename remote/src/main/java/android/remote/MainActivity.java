@@ -3,6 +3,7 @@ package android.remote;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.remote.mouse.MouseController;
 import android.remote.mouse.MouseModel;
 import android.remote.mouse.MouseView;
@@ -49,6 +50,8 @@ public class MainActivity extends Activity implements ConnectionThread.Connectio
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        // Set default preference values
+        PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
 
         mTextView = (TextView) findViewById(R.id.textView);
         // Set up MVC
