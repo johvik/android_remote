@@ -12,6 +12,7 @@ import android.view.GestureDetector;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
+import android.view.Window;
 import android.widget.Toast;
 
 import java.security.GeneralSecurityException;
@@ -27,6 +28,7 @@ public class MainActivity extends Activity implements ConnectionThread.Connectio
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         setContentView(R.layout.activity_main);
         // Set default preference values
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
@@ -125,6 +127,8 @@ public class MainActivity extends Activity implements ConnectionThread.Connectio
     private void connectedStateChange(ConnectionThread.ConnectionState connectionState) {
         if (mConnectionState != connectionState) {
             mConnectionState = connectionState;
+            setProgressBarIndeterminateVisibility(mConnectionState == ConnectionThread
+                    .ConnectionState.PENDING);
             invalidateOptionsMenu();
             updateFragment();
         }
