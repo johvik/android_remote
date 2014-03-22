@@ -1,10 +1,11 @@
 package android.remote;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.remote.mouse.MouseController;
 import android.remote.mouse.MouseModel;
 import android.remote.mouse.MouseView;
-import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.Menu;
@@ -21,7 +22,8 @@ import java.security.spec.RSAPublicKeySpec;
 
 import remote.api.Packet;
 
-public class MainActivity extends ActionBarActivity implements ConnectionThread.ConnectionCallback {
+public class MainActivity extends Activity implements ConnectionThread.ConnectionCallback {
+    private static final int SETTINGS_REQUEST = 1;
     private static final PublicKey PUBLIC_KEY;
     private static ConnectionThread mConnectionThread = null;
     private static MouseModel mMouseModel = null;
@@ -96,6 +98,8 @@ public class MainActivity extends ActionBarActivity implements ConnectionThread.
         // as you specify a parent activity in AndroidManifest.xml.
         switch (item.getItemId()) {
             case R.id.action_settings:
+                Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
+                startActivityForResult(intent, SETTINGS_REQUEST);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

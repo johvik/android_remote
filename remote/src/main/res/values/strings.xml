@@ -1,8 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
     <string name="app_name">Android Remote</string>
     <string name="action_settings">Settings</string>
     <string name="not_connected">Not connected</string>
-
+    <string name="pref_server_title">Server</string>
+    <string name="pref_server_address_title">Address</string>
+    <string name="pref_server_port_title">Port</string>
+    <string name="pref_login_title">Login</string>
+    <string name="pref_login_user">User</string>
+    <string name="pref_login_password">Password</string>
+    <string name="pref_rsa_tile">RSA</string>
+    <string name="pref_rsa_modulus">Modulus</string>
+    <string name="pref_rsa_exponent">Exponent</string>
 </resources>
