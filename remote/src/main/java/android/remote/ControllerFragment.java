@@ -115,8 +115,9 @@ public class ControllerFragment extends Fragment implements View.OnTouchListener
             Editable editable = mEditTextKeyboard.getText();
             if (editable != null) {
                 String keyboardInput = editable.toString();
-                mMouseController.onKeyboardInput(keyboardInput);
-                editable.clear();
+                if (mMouseController.onKeyboardInput(keyboardInput)) {
+                    editable.clear();
+                }
             }
             // Hack to hide the keyboard
             mEditTextKeyboard.setEnabled(false);

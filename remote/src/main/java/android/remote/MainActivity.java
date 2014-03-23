@@ -13,6 +13,7 @@ import android.view.MenuItem;
 import android.view.Window;
 import android.widget.Toast;
 
+import java.io.UnsupportedEncodingException;
 import java.security.GeneralSecurityException;
 
 public class MainActivity extends Activity implements ConnectionThread.ConnectionCallback,
@@ -146,6 +147,8 @@ public class MainActivity extends Activity implements ConnectionThread.Connectio
             } catch (GeneralSecurityException e) {
                 Toast.makeText(this, R.string.connection_config_fail, Toast.LENGTH_LONG).show();
             } catch (NumberFormatException e) {
+                Toast.makeText(this, R.string.connection_config_fail, Toast.LENGTH_LONG).show();
+            } catch (UnsupportedEncodingException e) {
                 Toast.makeText(this, R.string.connection_config_fail, Toast.LENGTH_LONG).show();
             }
         }

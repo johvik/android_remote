@@ -4,6 +4,8 @@ import android.remote.connection.ConnectionThread;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 
+import java.io.UnsupportedEncodingException;
+
 import remote.api.commands.MouseMove;
 import remote.api.commands.MousePress;
 import remote.api.commands.MouseRelease;
@@ -101,10 +103,16 @@ public class MouseController implements GestureDetector.OnGestureListener {
         mConnectionThread = connectionThread;
     }
 
-    public void onKeyboardInput(String input) {
+    public boolean onKeyboardInput(String input) {
         if (mConnectionThread != null) {
-            mConnectionThread.commandRequest(new TextInput(input));
+            try {
+                byte[] data = input.getBytes("UTF-8");
+                mConnectionThread.commandRequest(new TextInput(data));
+            } catch (UnsupportedEncodingException e) {
+                return false;
+            }
         }
+        return true;
     }
 
     /**

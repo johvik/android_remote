@@ -7,6 +7,7 @@ import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.remote.connection.ConnectionConfig;
 
+import java.io.UnsupportedEncodingException;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
 
@@ -28,7 +29,7 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
     }
 
     public static ConnectionConfig getConnectionConfig(SharedPreferences sharedPreferences)
-            throws GeneralSecurityException, NumberFormatException {
+            throws GeneralSecurityException, NumberFormatException, UnsupportedEncodingException {
         String serverAddress = sharedPreferences.getString(SettingsFragment
                 .KEY_PREF_SERVER_ADDRESS, "");
         String serverPort = sharedPreferences.getString(SettingsFragment.KEY_PREF_SERVER_PORT, "");
