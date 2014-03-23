@@ -7,6 +7,7 @@ import android.view.MotionEvent;
 import remote.api.commands.MouseMove;
 import remote.api.commands.MousePress;
 import remote.api.commands.MouseRelease;
+import remote.api.commands.TextInput;
 
 public class MouseController implements GestureDetector.OnGestureListener {
     private static final int LEFT_BUTTON_MASK = 1024; // BUTTON1_DOWN_MASK
@@ -102,7 +103,7 @@ public class MouseController implements GestureDetector.OnGestureListener {
 
     public void onKeyboardInput(String input) {
         if (mConnectionThread != null) {
-            // TODO
+            mConnectionThread.commandRequest(new TextInput(input));
         }
     }
 

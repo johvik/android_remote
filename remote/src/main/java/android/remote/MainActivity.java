@@ -114,7 +114,7 @@ public class MainActivity extends Activity implements ConnectionThread.Connectio
             if (oldState == ConnectionThread.ConnectionState.PENDING && newState ==
                     ConnectionThread.ConnectionState.CLOSED) {
                 // Failed to connect
-                Toast.makeText(this, R.string.connection_timeout, Toast.LENGTH_LONG).show();
+                Toast.makeText(this, R.string.connection_failed, Toast.LENGTH_LONG).show();
             }
             setProgressBarIndeterminateVisibility(mConnectionState == ConnectionThread
                     .ConnectionState.PENDING);
