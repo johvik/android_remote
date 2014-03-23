@@ -107,7 +107,7 @@ public class MainActivity extends Activity implements ConnectionThread.Connectio
                 return true;
             case R.id.action_terminate:
                 if (mConnectionState == ConnectionThread.ConnectionState.CONNECTED) {
-                    mConnectionThread.terminateRequest(false);
+                    mConnectionThread.terminateRequest(true);
                 }
                 return true;
             case R.id.action_settings:
