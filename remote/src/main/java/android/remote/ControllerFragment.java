@@ -7,16 +7,24 @@ import android.remote.connection.ConnectionThread;
 import android.remote.mouse.MouseController;
 import android.remote.mouse.MouseModel;
 import android.remote.mouse.MouseView;
+import android.text.Editable;
 import android.view.GestureDetector;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
+import android.widget.EditText;
+import android.widget.TextView;
 
-public class ControllerFragment extends Fragment implements View.OnTouchListener {
+public class ControllerFragment extends Fragment implements View.OnTouchListener,
+        TextView.OnEditorActionListener {
     private MouseController mMouseController;
     private ControllerFragmentListener mControllerFragmentListener;
     private GestureDetector mGestureDetector = null;
+    private MouseView mMouseView;
+    private EditText mEditTextKeyboard;
 
     public ControllerFragment() {
         // Required empty public constructor
@@ -33,13 +41,16 @@ public class ControllerFragment extends Fragment implements View.OnTouchListener
         View view = inflater.inflate(R.layout.fragment_controller, container, false);
 
         if (view != null) {
-            MouseView mouseView = (MouseView) view.findViewById(R.id.mouseView);
+            mEditTextKeyboard = (EditText) view.findViewById(R.id.editTextKeyboard);
+            mEditTextKeyboard.setOnEditorActionListener(this);
+
+            mMouseView = (MouseView) view.findViewById(R.id.mouseView);
             MouseModel mouseModel = mControllerFragmentListener.getMouseModel();
-            mouseView.setMouseModel(mouseModel);
-            mMouseController = new MouseController(mouseModel, mouseView);
+            mMouseView.setMouseModel(mouseModel);
+            mMouseController = new MouseController(mouseModel, mMouseView);
 
             mGestureDetector = new GestureDetector(getActivity(), mMouseController);
-            view.setOnTouchListener(this);
+            mMouseView.setOnTouchListener(this);
         }
         return view;
     }
@@ -84,6 +95,36 @@ public class ControllerFragment extends Fragment implements View.OnTouchListener
     @Override
     public boolean onTouch(View v, MotionEvent event) {
         return mGestureDetector != null && mGestureDetector.onTouchEvent(event);
+    }
+
+    /**
+     * Called when an action is being performed.
+     *
+     * @param v        The view that was clicked.
+     * @param actionId Identifier of the action.  This will be either the
+     *                 identifier you supplied, or {@link EditorInfo#IME_NULL
+     *                 EditorInfo.IME_NULL} if being called due to the enter key
+     *                 being pressed.
+     * @param event    If triggered by an enter key, this is the event;
+     *                 otherwise, this is null.
+     * @return Return true if you have consumed the action, else false.
+     */
+    @Override
+    public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+        if (actionId == EditorInfo.IME_ACTION_DONE) {
+            Editable editable = mEditTextKeyboard.getText();
+            if (editable != null) {
+                String keyboardInput = editable.toString();
+                mMouseController.onKeyboardInput(keyboardInput);
+                editable.clear();
+            }
+            // Hack to hide the keyboard
+            mEditTextKeyboard.setEnabled(false);
+            mEditTextKeyboard.setEnabled(true);
+            mMouseView.requestFocus();
+            return true;
+        }
+        return false;
     }
 
     public interface ControllerFragmentListener {

@@ -100,6 +100,12 @@ public class MouseController implements GestureDetector.OnGestureListener {
         mConnectionThread = connectionThread;
     }
 
+    public void onKeyboardInput(String input) {
+        if (mConnectionThread != null) {
+            // TODO
+        }
+    }
+
     /**
      * Notified when a tap occurs with the down {@link android.view.MotionEvent}
      * that triggered it. This will be triggered immediately for
@@ -168,7 +174,6 @@ public class MouseController implements GestureDetector.OnGestureListener {
     @Override
     public void onLongPress(MotionEvent e) {
         toggleButtonLock(e);
-        mMouseView.performLongClick();
     }
 
     /**
