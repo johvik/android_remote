@@ -30,7 +30,9 @@ public class MainActivity extends Activity implements ConnectionThread.Connectio
         // Set default preference values
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
         if (savedInstanceState == null) {
-            updateFragment();
+            // First time
+            getFragmentManager().beginTransaction().replace(R.id.container,
+                    NotConnectedFragment.newInstance()).commit();
         }
     }
 
@@ -105,26 +107,27 @@ public class MainActivity extends Activity implements ConnectionThread.Connectio
         }
     }
 
-    private void connectedStateChange(ConnectionThread.ConnectionState connectionState) {
-        if (mConnectionState != connectionState) {
-            if (mConnectionState == ConnectionThread.ConnectionState.PENDING && connectionState
-                    == ConnectionThread.ConnectionState.CLOSED) {
+    private void connectedStateChange(ConnectionThread.ConnectionState newState) {
+        if (mConnectionState != newState) {
+            ConnectionThread.ConnectionState oldState = mConnectionState;
+            mConnectionState = newState;
+            if (oldState == ConnectionThread.ConnectionState.PENDING && newState ==
+                    ConnectionThread.ConnectionState.CLOSED) {
                 // Failed to connect
                 Toast.makeText(this, R.string.connection_timeout, Toast.LENGTH_LONG).show();
             }
-            mConnectionState = connectionState;
             setProgressBarIndeterminateVisibility(mConnectionState == ConnectionThread
                     .ConnectionState.PENDING);
             invalidateOptionsMenu();
-            updateFragment();
+            updateFragment(oldState);
         }
     }
 
-    private void updateFragment() {
+    private void updateFragment(ConnectionThread.ConnectionState oldState) {
         if (mConnectionState == ConnectionThread.ConnectionState.CONNECTED) {
             getFragmentManager().beginTransaction().replace(R.id.container,
                     ControllerFragment.newInstance()).commit();
-        } else {
+        } else if (oldState == ConnectionThread.ConnectionState.CONNECTED) {
             getFragmentManager().beginTransaction().replace(R.id.container,
                     NotConnectedFragment.newInstance()).commit();
         }
