@@ -39,7 +39,7 @@ public class ControllerFragment extends Fragment implements View.OnTouchListener
             mMouseController = new MouseController(mouseModel, mouseView);
 
             mGestureDetector = new GestureDetector(getActivity(), mMouseController);
-            mControllerFragmentListener.setGestureDetector(mGestureDetector);
+            view.setOnTouchListener(this);
         }
         return view;
     }
@@ -69,7 +69,6 @@ public class ControllerFragment extends Fragment implements View.OnTouchListener
     @Override
     public void onDetach() {
         super.onDetach();
-        mControllerFragmentListener.setGestureDetector(null);
         mControllerFragmentListener = null;
     }
 
@@ -96,7 +95,5 @@ public class ControllerFragment extends Fragment implements View.OnTouchListener
         public MouseModel getMouseModel();
 
         public ConnectionThread getConnectionThread();
-
-        public void setGestureDetector(GestureDetector gestureDetector);
     }
 }

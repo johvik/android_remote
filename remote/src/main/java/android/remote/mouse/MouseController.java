@@ -109,7 +109,7 @@ public class MouseController implements GestureDetector.OnGestureListener {
      */
     @Override
     public boolean onDown(MotionEvent e) {
-        return false;
+        return true;
     }
 
     /**
@@ -188,6 +188,6 @@ public class MouseController implements GestureDetector.OnGestureListener {
      */
     @Override
     public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-        return false;
+        return true;
     }
 }

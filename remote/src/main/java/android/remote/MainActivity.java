@@ -8,10 +8,8 @@ import android.preference.PreferenceManager;
 import android.remote.connection.ConnectionConfig;
 import android.remote.connection.ConnectionThread;
 import android.remote.mouse.MouseModel;
-import android.view.GestureDetector;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.Window;
 import android.widget.Toast;
 
@@ -21,7 +19,6 @@ public class MainActivity extends Activity implements ConnectionThread.Connectio
         ControllerFragment.ControllerFragmentListener {
     private static final MouseModel mMouseModel = new MouseModel();
     private static ConnectionThread mConnectionThread = null;
-    private GestureDetector mGestureDetector = null;
     private ConnectionThread.ConnectionState mConnectionState = ConnectionThread.ConnectionState
             .CLOSED;
 
@@ -91,24 +88,13 @@ public class MainActivity extends Activity implements ConnectionThread.Connectio
         // as you specify a parent activity in AndroidManifest.xml.
         switch (item.getItemId()) {
             case R.id.action_connect:
-                if (mConnectionState == ConnectionThread.ConnectionState.CLOSED) {
-                    connectedStateChange(ConnectionThread.ConnectionState.PENDING);
-                    connect();
-                }
+                connect();
                 return true;
             case R.id.action_disconnect:
-                if (mConnectionState != ConnectionThread.ConnectionState.CLOSED) {
-                    connectedStateChange(ConnectionThread.ConnectionState.CLOSED);
-                    if (mConnectionThread != null) {
-                        mConnectionThread.disconnect();
-                        mConnectionThread = null;
-                    }
-                }
+                disconnect();
                 return true;
             case R.id.action_terminate:
-                if (mConnectionState == ConnectionThread.ConnectionState.CONNECTED) {
-                    mConnectionThread.terminateRequest(true);
-                }
+                terminate();
                 return true;
             case R.id.action_settings:
                 Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
@@ -119,13 +105,13 @@ public class MainActivity extends Activity implements ConnectionThread.Connectio
         }
     }
 
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        return mGestureDetector != null && mGestureDetector.onTouchEvent(event);
-    }
-
     private void connectedStateChange(ConnectionThread.ConnectionState connectionState) {
         if (mConnectionState != connectionState) {
+            if (mConnectionState == ConnectionThread.ConnectionState.PENDING && connectionState
+                    == ConnectionThread.ConnectionState.CLOSED) {
+                // Failed to connect
+                Toast.makeText(this, R.string.connection_timeout, Toast.LENGTH_LONG).show();
+            }
             mConnectionState = connectionState;
             setProgressBarIndeterminateVisibility(mConnectionState == ConnectionThread
                     .ConnectionState.PENDING);
@@ -145,8 +131,8 @@ public class MainActivity extends Activity implements ConnectionThread.Connectio
     }
 
     private void connect() {
-        if (mConnectionState != ConnectionThread.ConnectionState.CONNECTED || mConnectionThread
-                == null) {
+        if (mConnectionState == ConnectionThread.ConnectionState.CLOSED) {
+            connectedStateChange(ConnectionThread.ConnectionState.PENDING);
             try {
                 SharedPreferences sharedPreferences = PreferenceManager
                         .getDefaultSharedPreferences(this);
@@ -159,6 +145,22 @@ public class MainActivity extends Activity implements ConnectionThread.Connectio
             } catch (NumberFormatException e) {
                 Toast.makeText(this, R.string.connection_config_fail, Toast.LENGTH_LONG).show();
             }
+        }
+    }
+
+    private void disconnect() {
+        if (mConnectionState == ConnectionThread.ConnectionState.CONNECTED) {
+            connectedStateChange(ConnectionThread.ConnectionState.CLOSED);
+            if (mConnectionThread != null) {
+                mConnectionThread.disconnect();
+                mConnectionThread = null;
+            }
+        }
+    }
+
+    private void terminate() {
+        if (mConnectionState == ConnectionThread.ConnectionState.CONNECTED) {
+            mConnectionThread.terminateRequest(true);
         }
     }
 
@@ -177,6 +179,7 @@ public class MainActivity extends Activity implements ConnectionThread.Connectio
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
+                mConnectionThread = null;
                 connectedStateChange(ConnectionThread.ConnectionState.CLOSED);
             }
         });
@@ -195,10 +198,5 @@ public class MainActivity extends Activity implements ConnectionThread.Connectio
     @Override
     public ConnectionThread getConnectionThread() {
         return mConnectionThread;
-    }
-
-    @Override
-    public void setGestureDetector(GestureDetector gestureDetector) {
-        mGestureDetector = gestureDetector;
     }
 }
