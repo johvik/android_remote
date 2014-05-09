@@ -146,10 +146,13 @@ public class MainActivity extends Activity implements ConnectionThread.Connectio
                 mMouseModel.reset(); // Reset the state
             } catch (GeneralSecurityException e) {
                 Toast.makeText(this, R.string.connection_config_fail, Toast.LENGTH_LONG).show();
+                connectedStateChange(ConnectionThread.ConnectionState.CLOSED);
             } catch (NumberFormatException e) {
                 Toast.makeText(this, R.string.connection_config_fail, Toast.LENGTH_LONG).show();
+                connectedStateChange(ConnectionThread.ConnectionState.CLOSED);
             } catch (UnsupportedEncodingException e) {
                 Toast.makeText(this, R.string.connection_config_fail, Toast.LENGTH_LONG).show();
+                connectedStateChange(ConnectionThread.ConnectionState.CLOSED);
             }
         }
     }
