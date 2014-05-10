@@ -18,7 +18,7 @@ before_install:
 # "echo yes |" part is to accept license from android sdk manager tool
 - echo yes | android update sdk -a -t tools --force --no-ui > /dev/null
 - echo yes | android update sdk -a -t platform-tools --force --no-ui > /dev/null
-- echo yes | android update sdk -a -t build-tools-19.0.3 --force --no-ui > /dev/null
+- echo yes | android update sdk -a -t build-tools-19.0.1 --force --no-ui > /dev/null
 - echo yes | android update sdk -a -t extra-android-support --force --no-ui > /dev/null
 - echo yes | android update sdk -a -t extra-android-m2repository --force --no-ui > /dev/null
 - echo yes | android update sdk -a -t android-19 --force --no-ui > /dev/null
